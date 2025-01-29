@@ -1,0 +1,21 @@
+{{ define "bitrix24.message" }}
+{{ if gt (len .Alerts.Firing) 0 -}}
+*Внимание! Проблема обнаружена!*
+{{ range .Alerts.Firing }}
+*Причина:* {{ .Annotations.summary }}  
+*Хост:* {{ .Labels.instance }} {{ if .Labels.group }}(группа: {{ .Labels.group }}){{ end }}  
+*Значение:* {{ if .Annotations.valuepercent }}[{{ .Annotations.valuepercent }}|{{ .Annotations.valueabsolute }}]{{ end }}  
+*Consumer Group:* {{ if .Labels.consumergroup }}{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }}){{ end }}  
+{{ end }}
+{{ end }}
+
+{{ if gt (len .Alerts.Resolved) 0 -}}
+*Проблема решена!*
+{{ range .Alerts.Resolved }}
+*Причина:* {{ .Annotations.summary }}  
+*Хост:* {{ .Labels.instance }} {{ if .Labels.group }}(группа: {{ .Labels.group }}){{ end }}  
+*Значение:* {{ if .Annotations.valuepercent }}[{{ .Annotations.valuepercent }}|{{ .Annotations.valueabsolute }}]{{ end }}  
+*Consumer Group:* {{ if .Labels.consumergroup }}{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }}){{ end }}  
+{{ end }}
+{{ end }}
+{{ end }}
