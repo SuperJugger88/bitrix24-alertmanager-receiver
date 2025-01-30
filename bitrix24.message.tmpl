@@ -1,21 +1,91 @@
+{{ define "bitrix24_subject" }}{{ if gt (len .Alerts.Firing) 0 -}}Внимание!{{ end }}{{ if gt (len .Alerts.Resolved) 0 -}}Проблема решена!{{ end }}{{ end }}
 {{ define "bitrix24.message" }}
-{{ if gt (len .Alerts.Firing) 0 -}}
-*Внимание! Проблема обнаружена!*
+{{ if gt (len .Alerts.Firing) 0 }}
+{{ range $index, $alert := .Alerts.Firing }}
+{{ if eq $index 0 }}
+{{ if eq $alert.Labels.severity "critical" }}[COLOR=#CC0000]🔥 Внимание![/COLOR]{{ else }}[COLOR=#FF9900]⚠️ Внимание![/COLOR]{{ end }}
+[BR][B]Триггер:[/B] {{ $alert.Labels.alertname }}
+[BR][B]Приоритет:[/B] {{ $alert.Labels.severity }}
+[BR][B]Описание:[/B] {{ $alert.Annotations.description }}
+{{ end }}
+{{ end }}
+[BR][BR][U][B]Детали инцидента:[/B][/U][BR]
+{{ $hasHosts := false }}{{ $hasGroups := false }}{{ $hasValuesAbs := false }}{{ $hasValuesPercent := false }}{{ $hasConsumerGroups := false }}
 {{ range .Alerts.Firing }}
-*Причина:* {{ .Annotations.summary }}  
-*Хост:* {{ .Labels.instance }} {{ if .Labels.group }}(группа: {{ .Labels.group }}){{ end }}  
-*Значение:* {{ if .Annotations.valuepercent }}[{{ .Annotations.valuepercent }}|{{ .Annotations.valueabsolute }}]{{ end }}  
-*Consumer Group:* {{ if .Labels.consumergroup }}{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }}){{ end }}  
+ {{ if .Labels.instance }}{{ $hasHosts = true }}{{ end }}
+ {{ if .Labels.group }}{{ $hasGroups = true }}{{ end }}
+ {{ if .Annotations.valueabsolute }}{{ $hasValuesAbs = true }}{{ end }}
+ {{ if .Annotations.valuepercent }}{{ $hasValuesPercent = true }}{{ end }}
+ {{ if .Labels.consumergroup }}{{ $hasConsumerGroups = true }}{{ end }}
+{{ end }}
+
+{{ if $hasHosts }}
+[BR][B]Хост:[/B]
+{{ range .Alerts.Firing }}{{ if .Labels.instance }}[BR]{{ .Labels.instance }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasGroups }}
+[BR][B]Группа:[/B]
+{{ range .Alerts.Firing }}{{ if .Labels.group }}[BR]{{ .Labels.group }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasValuesAbs }}
+[BR][B]Значение (абс.):[/B]
+{{ range .Alerts.Firing }}{{ if .Annotations.valueabsolute }}[BR]{{ .Annotations.valueabsolute }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasValuesPercent }}
+[BR][B]Значение (%):[/B]
+{{ range .Alerts.Firing }}{{ if .Annotations.valuepercent }}[BR]{{ .Annotations.valuepercent }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasConsumerGroups }}
+[BR][B]Consumer Group:[/B]
+{{ range .Alerts.Firing }}{{ if .Labels.consumergroup }}[BR]{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }}){{ end }}{{ end }}
 {{ end }}
 {{ end }}
 
-{{ if gt (len .Alerts.Resolved) 0 -}}
-*Проблема решена!*
+{{ if and (gt (len .Alerts.Resolved) 0) (eq (len .Alerts.Firing) 0) }}
+[COLOR=#00AA00]✓ Проблема решена![/COLOR]
+{{ range $index, $alert := .Alerts.Resolved }}{{ if eq $index 0 }}
+[BR][B]Триггер:[/B] {{ $alert.Labels.alertname }}
+[BR][B]Приоритет:[/B] {{ $alert.Labels.severity }}
+[BR][B]Описание:[/B] {{ $alert.Annotations.description }}
+{{ end }}
+{{ end }}
+[BR][BR][U][B]Детали инцидента:[/B][/U][BR]
+{{ $hasHosts := false }}{{ $hasGroups := false }}{{ $hasValuesAbs := false }}{{ $hasValuesPercent := false }}{{ $hasConsumerGroups := false }}
 {{ range .Alerts.Resolved }}
-*Причина:* {{ .Annotations.summary }}  
-*Хост:* {{ .Labels.instance }} {{ if .Labels.group }}(группа: {{ .Labels.group }}){{ end }}  
-*Значение:* {{ if .Annotations.valuepercent }}[{{ .Annotations.valuepercent }}|{{ .Annotations.valueabsolute }}]{{ end }}  
-*Consumer Group:* {{ if .Labels.consumergroup }}{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }}){{ end }}  
+ {{ if .Labels.instance }}{{ $hasHosts = true }}{{ end }}
+ {{ if .Labels.group }}{{ $hasGroups = true }}{{ end }}
+ {{ if .Annotations.valueabsolute }}{{ $hasValuesAbs = true }}{{ end }}
+ {{ if .Annotations.valuepercent }}{{ $hasValuesPercent = true }}{{ end }}
+ {{ if .Labels.consumergroup }}{{ $hasConsumerGroups = true }}{{ end }}
+{{ end }}
+
+{{ if $hasHosts }}
+[BR][B]Хост:[/B]
+{{ range .Alerts.Resolved }}{{ if .Labels.instance }}[BR]{{ .Labels.instance }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasGroups }}
+[BR][B]Группа:[/B]
+{{ range .Alerts.Resolved }}{{ if .Labels.group }}[BR]{{ .Labels.group }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasValuesAbs }}
+[BR][B]Значение (абс.):[/B]
+{{ range .Alerts.Resolved }}{{ if .Annotations.valueabsolute }}[BR]{{ .Annotations.valueabsolute }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasValuesPercent }}
+[BR][B]Значение (%):[/B]
+{{ range .Alerts.Resolved }}{{ if .Annotations.valuepercent }}[BR]{{ .Annotations.valuepercent }}{{ end }}{{ end }}
+{{ end }}
+
+{{ if $hasConsumerGroups }}
+[BR][B]Consumer Group:[/B]
+{{ range .Alerts.Resolved }}{{ if .Labels.consumergroup }}[BR]{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }}){{ end }}{{ end }}
 {{ end }}
 {{ end }}
 {{ end }}
