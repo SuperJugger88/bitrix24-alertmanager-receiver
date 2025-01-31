@@ -3,7 +3,6 @@ package template
 import (
 	"fmt"
 	"strings"
-	"sync"
 	"text/template"
 
 	"github.com/prometheus/alertmanager/notify/webhook"
@@ -11,8 +10,7 @@ import (
 
 // Processor обрабатывает шаблоны сообщений
 type Processor struct {
-	tmpl  *template.Template
-	cache sync.Map // Кэш для обработанных шаблонов
+	tmpl *template.Template
 }
 
 // NewProcessor создает новый обработчик шаблонов
@@ -26,19 +24,11 @@ func NewProcessor(templatePath string) (*Processor, error) {
 
 // ProcessAlert обрабатывает алерт и возвращает отформатированное сообщение
 func (p *Processor) ProcessAlert(msg *webhook.Message) (string, error) {
-	// Пробуем получить из кэша
-	cacheKey := fmt.Sprintf("%s_%s", msg.Status, msg.Receiver)
-	if cached, ok := p.cache.Load(cacheKey); ok {
-		return cached.(string), nil
-	}
-
 	var message strings.Builder
 	if err := p.tmpl.ExecuteTemplate(&message, "bitrix24.message", msg); err != nil {
 		return "", fmt.Errorf("ошибка при выполнении шаблона: %w", err)
 	}
 
-	rawResult := message.String()
-	formattedResult := strings.ReplaceAll(rawResult, "\n", "")
-	p.cache.Store(cacheKey, formattedResult)
+	formattedResult := strings.ReplaceAll(message.String(), "\n", "")
 	return formattedResult, nil
 }
