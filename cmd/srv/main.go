@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
 	"time"
 
 	"and.ivanov.go.bitrix24_receiver/internal/alertmanager"
@@ -21,14 +20,13 @@ var (
 )
 
 func main() {
-	numWorkers := runtime.NumCPU()
-	bitrixClient := bitrix.NewClient(bitrixURL, numWorkers)
+	bitrixClient := bitrix.NewClient(bitrixURL)
 	tmplProcessor, err := template.NewProcessor(templatePath)
 	if err != nil {
 		log.Fatalf("Ошибка при инициализации обработчика шаблонов: %v", err)
 	}
 
-	handler := alertmanager.NewWebhookHandler(bitrixClient, tmplProcessor, numWorkers)
+	handler := alertmanager.NewWebhookHandler(bitrixClient, tmplProcessor)
 
 	// Регистрируем метрики
 	prometheus.MustRegister(metrics.RequestDuration)
@@ -36,7 +34,6 @@ func main() {
 	// Добавляем обработчики
 	http.HandleFunc("/webhook", handler.Handle)
 	http.Handle("/metrics", promhttp.Handler()) // Эндпоинт для метрик
-
 	port := os.Getenv("APP_PORT")
 
 	location, err := time.LoadLocation("Europe/Moscow")
@@ -55,7 +52,7 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 	}
 
-	log.Printf("Сервер запущен на порту %s с %d воркерами", port, numWorkers)
+	log.Printf("Сервер запущен на порту %s", port)
 	log.Printf("Метрики доступны по адресу http://localhost:%s/metrics", port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Ошибка при запуске сервера: %v", err)

@@ -11,7 +11,6 @@ import (
 	"and.ivanov.go.bitrix24_receiver/internal/bitrix"
 	"and.ivanov.go.bitrix24_receiver/internal/metrics"
 	"and.ivanov.go.bitrix24_receiver/internal/template"
-	"and.ivanov.go.bitrix24_receiver/internal/worker"
 
 	"github.com/prometheus/alertmanager/notify/webhook"
 )
@@ -20,43 +19,14 @@ import (
 type WebhookHandler struct {
 	bitrixClient *bitrix.Client
 	tmpl         *template.Processor
-	pool         *worker.Pool
 }
 
 // NewWebhookHandler создает новый обработчик webhook
-func NewWebhookHandler(bitrixClient *bitrix.Client, tmpl *template.Processor, workers int) *WebhookHandler {
-	h := &WebhookHandler{
+func NewWebhookHandler(bitrixClient *bitrix.Client, tmpl *template.Processor) *WebhookHandler {
+	return &WebhookHandler{
 		bitrixClient: bitrixClient,
 		tmpl:         tmpl,
-		pool:         worker.NewPool(workers),
 	}
-	h.pool.Start()
-	return h
-}
-
-type AlertJob struct {
-	handler *WebhookHandler
-	msg     *webhook.Message
-	done    chan error
-}
-
-func (j *AlertJob) Execute() error {
-	message, err := j.handler.tmpl.ProcessAlert(j.msg)
-	if err != nil {
-		j.done <- err
-		return err
-	}
-
-	dialogID := os.Getenv("BITRIX_DIALOG_ID")
-
-	bitrixMsg := &bitrix.Message{
-		DialogID: dialogID,
-		Message:  message,
-	}
-
-	err = j.handler.bitrixClient.SendMessageSync(bitrixMsg)
-	j.done <- err
-	return err
 }
 
 // Handle обрабатывает входящий webhook
@@ -73,25 +43,26 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	done := make(chan error)
-	h.pool.Submit(&AlertJob{
-		handler: h,
-		msg:     &msg,
-		done:    done,
-	})
-
-	// Ждем завершения обработки или таймаута
-	select {
-	case err := <-done:
-		if err != nil {
-			log.Printf("Ошибка обработки: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	case <-time.After(10 * time.Second):
-		http.Error(w, "Timeout", http.StatusGatewayTimeout)
+	if err := h.processAlert(&msg); err != nil {
+		log.Printf("Ошибка обработки: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *WebhookHandler) processAlert(msg *webhook.Message) error {
+	message, err := h.tmpl.ProcessAlert(msg)
+	if err != nil {
+		return err
+	}
+
+	dialogID := os.Getenv("BITRIX_DIALOG_ID")
+	bitrixMsg := &bitrix.Message{
+		DialogID: dialogID,
+		Message:  message,
+	}
+
+	return h.bitrixClient.SendMessage(bitrixMsg)
 }
