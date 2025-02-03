@@ -29,6 +29,6 @@ func (p *Processor) ProcessAlert(msg *webhook.Message) (string, error) {
 		return "", fmt.Errorf("ошибка при выполнении шаблона: %w", err)
 	}
 
-	formattedResult := strings.ReplaceAll(message.String(), "\n", "")
-	return formattedResult, nil
+	result := strings.ReplaceAll(message.String(), "\n", "")
+	return result, nil
 }
