@@ -25,4 +25,4 @@ exclude:
   - name: All
     paths:
       - cmd/srv/main.go
-      - internal
+      - internal/**/*
