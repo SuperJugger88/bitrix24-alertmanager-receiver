@@ -28,7 +28,6 @@ func (p *Processor) ProcessAlert(msg *webhook.Message) (string, error) {
 	if err := p.tmpl.ExecuteTemplate(&message, "bitrix24.message", msg); err != nil {
 		return "", fmt.Errorf("ошибка при выполнении шаблона: %w", err)
 	}
-
 	result := strings.ReplaceAll(message.String(), "\n", "")
 	return result, nil
 }

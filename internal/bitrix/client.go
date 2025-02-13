@@ -27,15 +27,23 @@ func NewClient(baseURL string) *Client {
 }
 
 // SendMessage отправляет сообщение в Bitrix24
-func (c *Client) SendMessage(msg *Message) error {
-	jsonData, err := json.Marshal(msg)
+func (c *Client) SendMessage(dialogID string, message string) error {
+	url := c.baseURL
+
+	data := map[string]string{
+		"DIALOG_ID": dialogID,
+		"MESSAGE":   message,
+	}
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("ошибка при формировании JSON: %w", err)
 	}
 
 	log.Printf("Отправка запроса в Bitrix24: %s", string(jsonData))
 
-	resp, err := http.Post(c.baseURL, "application/json", bytes.NewBuffer(jsonData))
+	log.Printf("Sending to URL: %s", url)
+	log.Printf("URL запроса: %s", url) // Добавлено логирование URL запроса
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("ошибка при отправке запроса: %w", err)
 	}

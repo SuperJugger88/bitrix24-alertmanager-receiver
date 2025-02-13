@@ -16,7 +16,6 @@ services:
         BITRIX_WEBHOOK_URL: ${BITRIX_WEBHOOK_URL}
         MESSAGE_TEMPLATE_PATH: ${MESSAGE_TEMPLATE_PATH}
         APP_PORT: ${APP_PORT}
-        BITRIX_DIALOG_ID: ${BITRIX_DIALOG_ID}
     volumes:
       - ./bitrix24.message.tmpl:/etc/bitrix24.message.tmpl
     ports:
