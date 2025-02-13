@@ -17,7 +17,7 @@ nexus.keyauto.ru/developer-helpers/bitrix24/receiver:latest
 Сервис развернут на сервере `metrics.keyauto.ru` в следующем каталоге:
 
 ```
-/opt/container_manifests/standalone/bitrix24_receiver
+/opt/container_manifests/standalone/bitrix24_receiver/compose.yml
 ```
 
 ## Интеграция с Alertmanager
