@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"and.ivanov.go.bitrix24_receiver/internal/bitrix"
@@ -43,7 +42,7 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.processAlert(&msg); err != nil {
+	if err := h.processAlert(w, r, &msg); err != nil {
 		log.Printf("Ошибка обработки: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -52,17 +51,16 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *WebhookHandler) processAlert(msg *webhook.Message) error {
+func (h *WebhookHandler) processAlert(w http.ResponseWriter, r *http.Request, msg *webhook.Message) error {
+	dialogID, ok := r.Context().Value("dialogID").(string)
+	if !ok {
+		http.Error(w, "dialogID not found in context", http.StatusInternalServerError)
+		return nil
+	}
 	message, err := h.tmpl.ProcessAlert(msg)
 	if err != nil {
 		return err
 	}
 
-	dialogID := os.Getenv("BITRIX_DIALOG_ID")
-	bitrixMsg := &bitrix.Message{
-		DialogID: dialogID,
-		Message:  message,
-	}
-
-	return h.bitrixClient.SendMessage(bitrixMsg)
+	return h.bitrixClient.SendMessage(dialogID, message)
 }

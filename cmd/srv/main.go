@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"and.ivanov.go.bitrix24_receiver/internal/alertmanager"
@@ -32,7 +34,18 @@ func main() {
 	prometheus.MustRegister(metrics.RequestDuration)
 
 	// Добавляем обработчики
-	http.HandleFunc("/webhook", handler.Handle)
+	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
+		dialogID := r.URL.Query().Get("dialog_id")
+		if dialogID == "" {
+			http.Error(w, "dialog_id parameter is required", http.StatusBadRequest)
+			return
+		}
+		if !strings.HasPrefix(dialogID, "chat") {
+			dialogID = "chat" + dialogID
+		}
+		ctx := context.WithValue(r.Context(), "dialogID", dialogID)
+		handler.Handle(w, r.WithContext(ctx))
+	})
 	http.Handle("/metrics", promhttp.Handler()) // Эндпоинт для метрик
 	port := os.Getenv("APP_PORT")
 

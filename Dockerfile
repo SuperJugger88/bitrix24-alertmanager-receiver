@@ -49,15 +49,14 @@ FROM alpine:latest AS final
 ARG MESSAGE_TEMPLATE_PATH
 ARG BITRIX_WEBHOOK_URL
 ARG APP_PORT
-ARG BITRIX_DIALOG_ID
 ARG TZ=Europe/Moscow
 
 ENV MESSAGE_TEMPLATE_PATH=$MESSAGE_TEMPLATE_PATH
 ENV BITRIX_WEBHOOK_URL=$BITRIX_WEBHOOK_URL
 ENV APP_PORT=$APP_PORT
-ENV BITRIX_DIALOG_ID=$BITRIX_DIALOG_ID
 ENV TZ=$TZ
 
+# Удалены все упоминания BITRIX_DIALOG_ID
 # Install any runtime dependencies that are needed to run your application.
 # Leverage a cache mount to /var/cache/apk/ to speed up subsequent builds.
 RUN --mount=type=cache,target=/var/cache/apk \
