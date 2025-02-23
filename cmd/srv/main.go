@@ -68,6 +68,6 @@ func main() {
 	log.Printf("Сервер запущен на порту %s", port)
 	log.Printf("Метрики доступны по адресу http://localhost:%s/metrics", port)
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("Ошибка при запуске сервера: %v", err)
+		log.Panicf("Ошибка при запуске сервера: %v", err)
 	}
 }

@@ -28,7 +28,7 @@
 
 {{ if $hasHosts }}
 [BR][B]Хост:[/B]
-{{ range .Alerts.Firing }}{{ if .Labels.instance }}[BR]{{ .Labels.instance }}{{ end }}{{ end }}
+{{ range .Alerts.Firing }}{{ if .Labels.instance }}[BR]{{ .Labels.instance }} (Значение: {{ .Annotations.value }}){{ end }}{{ end }}
 {{ end }}
 
 {{ if $hasGroups }}
@@ -43,11 +43,6 @@
 {{ range .Alerts.Firing }}{{ if .Labels.consumergroup }}
 [BR]{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }})
 {{ end }}{{ end }}
-{{ end }}
-
-{{ if $hasValues }}
-[BR][B]Значение:[/B]
-{{ range .Alerts.Resolved }}{{ if .Annotations.valueabsolute }}[BR]{{ .Annotations.valueabsolute }}{{ end }}{{ end }}
 {{ end }}
 
 {{ end }}
@@ -81,7 +76,7 @@
 
 {{ if $hasHosts }}
 [BR][B]Хост:[/B]
-{{ range .Alerts.Resolved }}{{ if .Labels.instance }}[BR]{{ .Labels.instance }}{{ end }}{{ end }}
+{{ range .Alerts.Resolved }}{{ if .Labels.instance }}[BR]{{ .Labels.instance }} (Значение: {{ .Annotations.value }}){{ end }}{{ end }}
 {{ end }}
 
 {{ if $hasGroups }}
@@ -96,11 +91,6 @@
 {{ range .Alerts.Resolved }}{{ if .Labels.consumergroup }}
 [BR]{{ .Labels.consumergroup }} (Lag: {{ .Annotations.valueabsolute }})
 {{ end }}{{ end }}
-{{ end }}
-
-{{ if $hasValues }}
-[BR][B]Значение:[/B]
-{{ range .Alerts.Resolved }}{{ if .Annotations.valueabsolute }}[BR]{{ .Annotations.valueabsolute }}{{ end }}{{ end }}
 {{ end }}
 
 {{ end }}
