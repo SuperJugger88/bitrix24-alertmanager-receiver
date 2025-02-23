@@ -21,7 +21,7 @@ profile:
 #  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
 linter: jetbrains/qodana-go:2024.3
-exclude:
+include:
   - name: All
     paths:
       - cmd/srv/main.go
