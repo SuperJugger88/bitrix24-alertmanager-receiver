@@ -7,10 +7,10 @@ Receiver Bitrix24 — это сервис, предназначенный для
 Receiver работает, получая уведомления вебхуков от Alertmanager. Он обрабатывает эти уведомления и пересылает их в соответствующие каналы Bitrix24, обеспечивая эффективную коммуникацию предупреждений.
 
 ## Docker-образ
-Receiver Bitrix24 упакован в виде Docker-образа, который можно найти по следующей ссылке:
+Receiver Bitrix24 упакован в виде Docker-образа, собрать можно следующей командой:
 
-```
-<docker_registry>/bitrix24/receiver:latest
+```bash
+docker buildx build --build-arg=BITRIX_WEBHOOK_URL=<your_webhook_url> --build-arg=APP_PORT=4000 --build-arg=MESSAGE_TEMPLATE_PATH=/etc/bitrix24.message.tmpl  --platform linux/amd64 --push  -t <your_docker_registry>/<helpers_path>/bitrix24/receiver:latest .
 ```
 
 ## Развертывание
@@ -27,7 +27,7 @@ version: '3.9'
 
 services:
   bitrix24-receiver:
-    image: '<docker_registry>/bitrix24/receiver:latest'
+    image: '<your_docker_registry>/<helpers_path>/bitrix24/receiver:latest'
     restart: always
     volumes:
       - /etc/alertmanager/templates/bitrix24.message.tmpl:/etc/bitrix24.message.tmpl
