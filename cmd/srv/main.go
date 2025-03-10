@@ -16,6 +16,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+type DialogID string
+
+const id DialogID = "dialogID"
+
 var (
 	bitrixURL    = os.Getenv("BITRIX_WEBHOOK_URL")
 	templatePath = os.Getenv("MESSAGE_TEMPLATE_PATH")
@@ -43,7 +47,7 @@ func main() {
 		if !strings.HasPrefix(dialogID, "chat") {
 			dialogID = "chat" + dialogID
 		}
-		ctx := context.WithValue(r.Context(), "dialogID", dialogID)
+		ctx := context.WithValue(r.Context(), id, dialogID)
 		handler.Handle(w, r.WithContext(ctx))
 	})
 	http.Handle("/metrics", promhttp.Handler()) // Эндпоинт для метрик

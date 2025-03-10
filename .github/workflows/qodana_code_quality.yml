@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  qodana:
+  lint:
     runs-on: ubuntu-latest
     permissions:
       contents: write
